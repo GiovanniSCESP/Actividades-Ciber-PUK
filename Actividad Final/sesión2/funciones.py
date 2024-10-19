@@ -103,7 +103,7 @@ def deletePassword(user: str, index: int) -> bool:
         if i == index:
             del user_data['saved_passwords'][i] # Eliminamos del diccionario la constraseña especificada.
             saveFile()
-            print(f'Se ha eliminado el elemento {i} {pass_data.get('title')} correctamente')
+            print(f'Se ha eliminado el elemento {i} {pass_data.get("title")} correctamente')
             return True
     
     print(f'No se ha encontrado ningún elemento con el índice {index}')
