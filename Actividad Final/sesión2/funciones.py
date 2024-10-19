@@ -73,14 +73,14 @@ def saveUser(user: str, passwd: str) -> bool:
 
 def encryptPassword(passwd: str, key: bytes) -> bytes:
     'Encripta la contraseña con la clave dada.'
-    f = Fernet(key) # Iniciamos el objeto de Fernet con la clave
+    f = Fernet(key) # Iniciamos el objeto de Fernet con la clave.
     token = f.encrypt(passwd.encode('utf-8')) # Encriptamos la contraseña introducida.
     return token
 
 
 def decryptPassword(token: bytes, key: bytes) -> str:
     'Desencripta la contraseña con la clave dada.'
-    f = Fernet(key) # Iniciamos el objeto de Fernet con la clave
+    f = Fernet(key) # Iniciamos el objeto de Fernet con la clave.
     passwd = f.decrypt(token).decode('utf-8') # Desencriptamos la contraseña introducida.
     return passwd
 
@@ -90,7 +90,7 @@ def savePassword(user: str, title: str, passwd: str, key: bytes) -> None:
     user_data = [data for data in user_db if data['user'] == user][0]
     passwd_enc = encryptPassword(passwd, key)
     
-    user_data['saved_passwords'].append({'title': title, 'password': passwd_enc.decode('utf-8')})
+    user_data['saved_passwords'].append({'title': title, 'password': passwd_enc.decode('utf-8')}) # Añadimos al diccionario la contraseña especificada.
     saveFile()
     print(f'Se ha guardado el elemento {title} correctamente')
 
@@ -101,7 +101,7 @@ def deletePassword(user: str, index: int) -> bool:
 
     for i, pass_data in enumerate(user_data['saved_passwords']):
         if i == index:
-            del user_data['saved_passwords'][i]
+            del user_data['saved_passwords'][i] # Eliminamos del diccionario la constraseña especificada.
             saveFile()
             print(f'Se ha eliminado el elemento {i} {pass_data.get('title')} correctamente')
             return True
@@ -116,7 +116,7 @@ def getStoredPasswords(user: str, key: bytes) -> None:
 
     if user_data['saved_passwords']:
         for i, pass_data in enumerate(user_data['saved_passwords']):
-            print(i, pass_data['title'], decryptPassword(pass_data['password'].encode('utf-8'), key))
+            print(i, pass_data['title'], decryptPassword(pass_data['password'].encode('utf-8'), key)) # Mostramos cada contraseña desencriptada.
     else:
         print('No existen contraseñas guardadas')
 
