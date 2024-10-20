@@ -30,7 +30,7 @@ if __name__ == '__main__':
                 case 3:
                     sys.exit(0) # Salimos con un código de estado correcto.
                 case _:
-                    print(f'La opción {user_input} no existe.') # Aseguramos un caso no esperado.
+                    print(f'La opción {user_input} no existe') # Aseguramos un caso no esperado.
     
     except Exception as e: # Gestionamos una posible excepción.
         print(e)

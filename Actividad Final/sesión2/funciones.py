@@ -2,7 +2,7 @@ from cryptography.fernet import Fernet
 import bcrypt, json
 
 
-def loadFile() -> list:
+def loadFile() -> list[dict]:
     'Carga la lista y sus diccionarios de un archivo.'
     try:
         with open('user_db.json', 'r', encoding='utf-8') as f:
@@ -21,6 +21,11 @@ def saveFile() -> None:
         json.dump(user_db, f, ensure_ascii=False, indent=4) # Con json.dump guardamos los datos en el archivo.
 
 
+def clearFile() -> None:
+    'Limpia los datos de `user_db`.'
+    with open('user_db.json', 'w', encoding='utf-8') as f: f.write('')
+
+
 user_db = loadFile() # Tendremos una lista con con los usuarios dentro como base de datos.
 # Guardaremos una lista con un diccionario por cada usuario con el nombre, contraseña hasheada y contraseñas guardadas encriptadas usando la contraseña como clave para la encriptación.
 # user_db = [
@@ -30,7 +35,7 @@ user_db = loadFile() # Tendremos una lista con con los usuarios dentro como base
 
 
 def hashPassword(passwd: str) -> bytes:
-    'Devuelve una string como hash de bcrypt con salt.'
+    'Devuelve una cadena de bytes como hash de bcrypt con salt.'
     passwd_bytes = passwd.encode('utf-8')
     salt = bcrypt.gensalt()
     passwd_hash = bcrypt.hashpw(passwd_bytes, salt)
@@ -42,11 +47,11 @@ def checkUser(user: str, passwd: str) -> bool:
     'Comprueba el inicio de sesión de un usuario.'
     # Si existen usuarios se selecciona la contraseña hasheada del usuario con el que tratamos iniciar sesión.
     db_passwd_hash = False
-    if len(user_db): db_passwd_hash = [data['password'] for data in user_db if data['user'] == user][0] # No pueden existir dos usuarios con el mismo nombre.
+    if len(user_db): db_passwd_hash = [data['password'] for data in user_db if data['user'] == user] # No pueden existir dos usuarios con el mismo nombre.
 
     passwd_bytes = passwd.encode('utf-8')
 
-    if db_passwd_hash and bcrypt.checkpw(passwd_bytes, db_passwd_hash.encode('utf-8')): 
+    if db_passwd_hash and bcrypt.checkpw(passwd_bytes, db_passwd_hash[0].encode('utf-8')): 
         # Si la contraseña del usuario existe y la contraseña introducida coincide con la almacenada como hash se inicia sesión.
         print('Inicio de sesión correcto')
         return True
@@ -55,12 +60,24 @@ def checkUser(user: str, passwd: str) -> bool:
         return False # Devolvemos True o False por si fuera necesario realizar alguna comprobación adicional.
 
 
+def validateCreds(user: str, passwd: str) -> bool:
+    'Valida la longitud de las credenciales introducidas.'
+    if len(user.strip()) < 3:
+        print('El nombre de usuario es muy corto')
+        return False
+    elif len(passwd.strip()) < 5:
+        print('La contraseña es muy corta')
+        return False
+    else:
+        return True
+
+
 def saveUser(user: str, passwd: str) -> bool:
     'Guarda los datos de creación del usuario.'
     # Verificamos si el usuario existe con un list comprehension, si existe tendremos una lista con un resultado.
     user_exists = [data['user'] for data in user_db if data['user'] == user]
 
-    if not user_exists: # Si el usuario no existe podemos guardar un nuevo usuario con la contraseña introducida como hash.
+    if not user_exists and validateCreds(user, passwd): # Si el usuario no existe podemos guardar un nuevo usuario con la contraseña introducida como hash.
         passwd_hash = hashPassword(passwd)
         user_db.append({"user": user, "password": passwd_hash.decode('utf-8'), "saved_passwords": []})
         saveFile()
@@ -88,11 +105,15 @@ def decryptPassword(token: bytes, key: bytes) -> str:
 def savePassword(user: str, title: str, passwd: str, key: bytes) -> None:
     'Guarda la contraseña encriptándola con la clave dada.'
     user_data = [data for data in user_db if data['user'] == user][0]
-    passwd_enc = encryptPassword(passwd, key)
     
-    user_data['saved_passwords'].append({'title': title, 'password': passwd_enc.decode('utf-8')}) # Añadimos al diccionario la contraseña especificada.
-    saveFile()
-    print(f'Se ha guardado el elemento {title} correctamente')
+    if len(title.strip()) and len(passwd.strip()):
+        passwd_enc = encryptPassword(passwd, key)
+        
+        user_data['saved_passwords'].append({'title': title, 'password': passwd_enc.decode('utf-8')}) # Añadimos al diccionario la contraseña especificada.
+        saveFile()
+        print(f'Se ha guardado el elemento {title} correctamente')
+    else:
+        print('Debes introducir un título y contraseña válidos')
 
 
 def deletePassword(user: str, index: int) -> bool:
@@ -139,4 +160,4 @@ def main(user: str, key: bytes) -> None:
             case 4:
                 break
             case _:
-                print(f'La opción {user_input} no existe.')
+                print(f'La opción {user_input} no existe')
