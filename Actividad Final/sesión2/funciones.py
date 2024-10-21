@@ -83,9 +83,11 @@ def saveUser(user: str, passwd: str) -> bool:
         saveFile()
         print('El usuario se ha guardado correctamente')
         return True
-    else: # Si el usuario ya existe se lo comunicamos la usuario.
+    elif user_exists: # Si el usuario ya existe se lo comunicamos la usuario.
         print('El nombre de usuario ya existe')
         return False # Devolvemos True o False por si fuera necesario realizar alguna comprobación.
+    else:
+        return False
 
 
 def encryptPassword(passwd: str, key: bytes) -> bytes:
